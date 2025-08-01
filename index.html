@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUBMISSION TRACK</title>
+    <title>SUBMITION CHECK</title>
     <style>
         /* CSS Reset and Global Styles */
         :root {
@@ -231,7 +231,7 @@
     </div>
 
     <div class="container">
-        <h1>SUBMISSION TRACK📝</h1>
+        <h1>SUBMITION CHECK📝</h1>
 
         <div id="setup-container">
             <label for="subject-count-input">How many subjects do you want to start with?</label>
@@ -278,10 +278,54 @@
             const addSubjectBtn = document.getElementById('add-subject-btn');
             let subjectIdCounter = 0;
 
-            // NEW: Renumbers all items in a given container sequentially.
+            // --- NEW: SAVE/LOAD LOGIC ---
+            const saveState = () => {
+                const subjectsData = [];
+                const subjectRows = document.querySelectorAll('.subject-row');
+                subjectRows.forEach(row => {
+                    const subjectData = {
+                        id: row.dataset.subjectId,
+                        name: row.querySelector('.subject-name-input').value,
+                        isCollapsed: row.classList.contains('content-collapsed'),
+                        content: {
+                            experiment: [],
+                            tutorial: [],
+                            assignment: []
+                        }
+                    };
+                    ['experiment', 'tutorial', 'assignment'].forEach(type => {
+                        const items = row.querySelectorAll(`#${type}-row-${subjectData.id} .content-item`);
+                        items.forEach(item => {
+                            subjectData.content[type].push({
+                                marks: item.querySelector('.marks-input').value,
+                                status: item.querySelector('.status-select').value
+                            });
+                        });
+                    });
+                    subjectsData.push(subjectData);
+                });
+                localStorage.setItem('submissionCheckState', JSON.stringify(subjectsData));
+            };
+
+            const loadState = () => {
+                const savedState = localStorage.getItem('submissionCheckState');
+                if (!savedState) return;
+
+                const subjectsData = JSON.parse(savedState);
+                if (subjectsData.length === 0) return;
+
+                subjectsContainer.innerHTML = '';
+                subjectsData.forEach(subjectData => {
+                    createSubjectRow(subjectData); // Pass data to create row
+                });
+
+                setupContainer.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            };
+
             const renumberItems = (container) => {
                 if (!container) return;
-                const type = container.id.split('-')[0]; // eg., 'experiment' from 'experiment-row-1'
+                const type = container.id.split('-')[0];
                 const typeDisplay = type.charAt(0).toUpperCase() + type.slice(1);
                 const items = container.querySelectorAll(':scope > .content-item');
                 items.forEach((item, index) => {
@@ -292,17 +336,15 @@
                 });
             };
 
-            const createContentItem = (type, subjectRow, insertAfterElement = null) => {
+            const createContentItem = (type, subjectRow, itemData = null, insertAfterElement = null) => {
                 const subjectId = subjectRow.dataset.subjectId;
                 const containerId = `${type}-row-${subjectId}`;
                 const targetContainer = subjectRow.querySelector(`#${containerId}`);
-
                 if (!targetContainer) return;
                 
                 const contentItem = document.createElement('div');
-                contentItem.className = 'content-item status-not-submitted';
+                contentItem.className = 'content-item'; // Base class
                 
-                // The title is now just a placeholder, as renumberItems() will fix it.
                 contentItem.innerHTML = `
                     <div class="content-item-header">
                         <span class="content-item-title">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
@@ -314,7 +356,7 @@
                         <input type="number" class="marks-input" placeholder="Enter Marks">
                         <label>Status:</label>
                         <select class="status-select">
-                            <option value="not-submitted" selected>Not Submitted</option>
+                            <option value="not-submitted">Not Submitted</option>
                             <option value="submitted">Submitted</option>
                             <option value="corrected">Corrected</option>
                         </select>
@@ -331,7 +373,7 @@
                     targetContainer.appendChild(contentItem);
                 }
                 
-                renumberItems(targetContainer); // Renumber after any insertion.
+                renumberItems(targetContainer);
 
                 const menuToggleBtn = contentItem.querySelector('.menu-toggle-btn');
                 const menu = contentItem.querySelector('.content-item-menu');
@@ -341,8 +383,18 @@
                 const marksInput = contentItem.querySelector('.marks-input');
                 const marksDisplay = contentItem.querySelector('.content-item-marks-display');
 
+                // Populate data if loading from save
+                if (itemData) {
+                    marksInput.value = itemData.marks;
+                    marksDisplay.textContent = itemData.marks;
+                    statusSelect.value = itemData.status;
+                }
+                contentItem.classList.add(`status-${statusSelect.value}`);
+
+
                 marksInput.addEventListener('input', (e) => {
                     marksDisplay.textContent = e.target.value;
+                    saveState();
                 });
 
                 menuToggleBtn.addEventListener('click', (e) => {
@@ -360,25 +412,34 @@
                 removeItemBtn.addEventListener('click', () => {
                     const parentContainer = contentItem.parentElement;
                     contentItem.remove();
-                    renumberItems(parentContainer); // Renumber after any removal.
+                    renumberItems(parentContainer);
+                    saveState();
                 });
                 
                 addItemBtn.addEventListener('click', () => {
                     menu.classList.add('hidden');
-                    createContentItem(type, subjectRow, contentItem);
+                    createContentItem(type, subjectRow, null, contentItem);
+                    saveState();
                 });
                 
                 statusSelect.addEventListener('change', (e) => {
                     contentItem.classList.remove('status-not-submitted', 'status-submitted', 'status-corrected');
                     contentItem.classList.add('status-' + e.target.value);
+                    saveState();
                 });
             };
 
-            const createSubjectRow = () => {
-                subjectIdCounter++;
-                const subjectId = subjectIdCounter;
+            // MODIFIED: Accepts optional data object for loading state
+            const createSubjectRow = (subjectData = null) => {
+                const subjectId = subjectData ? subjectData.id : ++subjectIdCounter;
+                if (!subjectData) subjectIdCounter = Math.max(subjectIdCounter, subjectId);
+
                 const subjectRow = document.createElement('div');
-                subjectRow.className = 'subject-row content-collapsed';
+                subjectRow.className = 'subject-row';
+                if (!subjectData || subjectData.isCollapsed) {
+                    subjectRow.classList.add('content-collapsed');
+                }
+                
                 subjectRow.dataset.subjectId = subjectId;
                 
                 const subjectDetails = document.createElement('div');
@@ -388,7 +449,9 @@
                 nameInput.type = 'text';
                 nameInput.className = 'subject-name-input';
                 nameInput.placeholder = `Subject ${subjectId} Name`;
-                
+                nameInput.value = subjectData ? subjectData.name : '';
+                nameInput.addEventListener('input', saveState);
+
                 const contentControls = document.createElement('div');
                 contentControls.className = 'content-controls';
                 
@@ -406,6 +469,7 @@
                         toggleContentBtn.textContent = '▲';
                     }
                     createContentItem(contentTypeSelect.value, subjectRow);
+                    saveState();
                 });
                 
                 contentControls.append(contentTypeSelect, addContentBtn);
@@ -417,14 +481,24 @@
                 
                 const toggleContentBtn = document.createElement('button');
                 toggleContentBtn.className = 'toggle-content-btn';
-                toggleContentBtn.textContent = '▼';
+                toggleContentBtn.textContent = subjectRow.classList.contains('content-collapsed') ? '▼' : '▲';
                 toggleContentBtn.addEventListener('click', () => {
                     subjectRow.classList.toggle('content-collapsed');
                     toggleContentBtn.textContent = subjectRow.classList.contains('content-collapsed') ? '▼' : '▲';
+                    saveState();
                 });
 
                 subjectRow.append(toggleContentBtn, subjectDetails, contentArea);
                 subjectsContainer.appendChild(subjectRow);
+
+                // If loading, create the content items too
+                if (subjectData) {
+                    ['experiment', 'tutorial', 'assignment'].forEach(type => {
+                        subjectData.content[type].forEach(itemData => {
+                            createContentItem(type, subjectRow, itemData);
+                        });
+                    });
+                }
             };
 
             document.addEventListener('click', (e) => {
@@ -444,9 +518,17 @@
                     }
                     setupContainer.classList.add('hidden');
                     mainContent.classList.remove('hidden');
+                    saveState();
                 }
             });
-            addSubjectBtn.addEventListener('click', createSubjectRow);
+
+            addSubjectBtn.addEventListener('click', () => {
+                createSubjectRow();
+                saveState();
+            });
+
+            // --- INITIALIZE APP ---
+            loadState();
         });
     </script>
 </body>
