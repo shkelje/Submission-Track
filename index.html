@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUBMITION CHECK</title>
+    <style>
+        /* CSS Reset and Global Styles */
+        :root {
+            /* Light Mode (Default) */
+            --primary-color: #3d70b2;
+            --secondary-color: #5596e6;
+            --tertiary-color: #41d6c3;
+            --background-color: #f5f7fa;
+            --card-background: rgba(255, 255, 255, 0.8);
+            --text-color: #333;
+            --light-text-color: #fff;
+            --border-color: #bdbbbb;
+            --input-background: rgba(255,255,255,0.5);
+            --heading-color: #3d70b2;
+
+            /* Light Mode Status Colors */
+            --status-not-submitted-bg: #fee2e2;
+            --status-not-submitted-border: #ef4444;
+            --status-not-submitted-text: #b91c1c;
+            --status-submitted-bg: #dcfce7;
+            --status-submitted-border: #22c55e;
+            --status-submitted-text: #15803d;
+            --status-corrected-bg: #a7e4f3;
+            --status-corrected-border: #407bcc;
+            --status-corrected-text: #064988;
+        }
+
+        body.dark-mode {
+            /* Dark Mode Palette */
+            --primary-color: #5596e6;
+            --secondary-color: #41d6c3;
+            --tertiary-color: #29a0cfe6;
+            --background-color: #0f172a;
+            --card-background: rgba(30, 41, 59, 0.8);
+            --text-color: #dfe5ec;
+            --light-text-color: #0f172a;
+            --border-color: #334155;
+            --input-background: rgba(51, 65, 85, 0.5);
+            --heading-color: #93c5fd;
+
+            /* Dark Mode Status Colors */
+            --status-not-submitted-bg: #a22727bc;
+            --status-not-submitted-border: #ef4444;
+            --status-not-submitted-text: #fecaca;
+            --status-submitted-bg: #0ba541a9;
+            --status-submitted-border: #3db268;
+            --status-submitted-text: #dcfce7;
+            --status-corrected-bg: #064988d2;
+            --status-corrected-border: #407bcc;
+            --status-corrected-text: #a7e4f3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(212, 53%, 47%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 98% 2%, hsla(210, 79%, 61%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 95%, hsla(173, 64%, 55%, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        
+        /* Theme Toggle Switch */
+        .theme-switch-wrapper { position: fixed; top: 1rem; right: 1.5rem; z-index: 999; }
+        .theme-switch { display: inline-block; height: 34px; position: relative; width: 60px; }
+        .theme-switch input { display:none; }
+        .slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; }
+        .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 26px; left: 4px; position: absolute; transition: .4s; width: 26px; }
+        .slider:after { content: '☀️'; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #333; }
+        input:checked + .slider:after { content: '🌙'; left: auto; right: 6px; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+
+        /* Main Container */
+        .container { max-width: 1200px; margin: 2rem auto; padding: 1rem; position: relative; z-index: 1; }
+        h1 { color: var(--heading-color); text-align: center; margin-bottom: 2rem; font-size: 2.5rem; }
+        .hidden { display: none !important; }
+
+        /* Setup Section & Subject Row */
+        #setup-container, .subject-row {
+            background: var(--card-background);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            border-radius: 12px;
+        }
+        #setup-container { padding: 2rem; max-width: 500px; margin: 4rem auto; text-align: center; }
+        #setup-container label { display: block; margin-bottom: 1rem; font-size: 1.2rem; }
+        
+        input, select {
+            background-color: var(--input-background);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); }
+        #subject-count-input { width: 100px; font-size: 1rem; text-align: center; margin-right: 0.5rem; }
+
+        /* Buttons */
+        button { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out; color: var(--light-text-color); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-secondary { background-color: var(--secondary-color); }
+        .btn-tertiary { background-color: var(--tertiary-color); color: var(--text-color); padding: 0.5rem 1rem; font-size: 0.9rem; }
+
+        /* Subject Row Styling */
+        .subject-row { width: 100%; padding: 1.5rem; display: grid; grid-template-columns: 250px 1fr; gap: 1.5rem; align-items: start; }
+        .subject-details { display: flex; flex-direction: column; gap: 1rem; }
+        .subject-name-input { font-size: 1.1rem; font-weight: bold; }
+        .content-controls { display: flex; gap: 0.5rem; align-items: center; }
+        .content-type-select { flex-grow: 1; padding: 0.5rem; }
+        .content-area { display: flex; flex-direction: column; gap: 1rem; }
+        .content-sub-row { display: flex; flex-wrap: wrap; gap: 1rem; min-height: 20px; }
+        
+        .content-item { padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.75rem; width: 180px; }
+        .content-item-header { font-weight: 600; }
+        
+        /* Status Color Styling */
+        .content-item.status-not-submitted { background-color: var(--status-not-submitted-bg); border-color: var(--status-not-submitted-border); }
+        .content-item.status-not-submitted .content-item-header { color: var(--status-not-submitted-text); }
+        
+        .content-item.status-submitted { background-color: var(--status-submitted-bg); border-color: var(--status-submitted-border); }
+        .content-item.status-submitted .content-item-header { color: var(--status-submitted-text); }
+
+        .content-item.status-corrected { background-color: var(--status-corrected-bg); border-color: var(--status-corrected-border); }
+        .content-item.status-corrected .content-item-header { color: var(--status-corrected-text); }
+        
+        .marks-input { padding: 0.5rem; }
+        #main-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+
+        /* Responsive Design */
+        @media (max-width: 900px) { .subject-row { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { h1 { font-size: 2rem; } .container { margin: 1rem auto; } #setup-container { padding: 1.5rem; } }
+    </style>
+</head>
+<body>
+
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="theme-toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <span class="slider round"></span>
+        </label>
+    </div>
+
+    <div class="container">
+        <h1>SUBMITION CHECK📝</h1>
+
+        <div id="setup-container">
+            <label for="subject-count-input">How many subjects do you want to start with?</label>
+            <div>
+                <input type="number" id="subject-count-input" value="3" min="1">
+                <button id="create-subjects-btn" class="btn-primary">Create</button>
+            </div>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div id="subjects-container" style="width: 100%; display: flex; flex-direction: column; gap: 1.5rem;"></div>
+            <button id="add-subject-btn" class="btn-secondary">＋ Add Another Subject</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- THEME SWITCH LOGIC ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    themeToggle.checked = true;
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    themeToggle.checked = false;
+                }
+            };
+            themeToggle.addEventListener('change', function() {
+                const newTheme = this.checked ? 'dark' : 'light';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+
+
+            // --- ORIGINAL APP LOGIC ---
+            const setupContainer = document.getElementById('setup-container');
+            const mainContent = document.getElementById('main-content');
+            const createSubjectsBtn = document.getElementById('create-subjects-btn');
+            const subjectCountInput = document.getElementById('subject-count-input');
+            const subjectsContainer = document.getElementById('subjects-container');
+            const addSubjectBtn = document.getElementById('add-subject-btn');
+            let subjectIdCounter = 0;
+
+            const createSubjectRow = () => {
+                subjectIdCounter++;
+                const subjectId = subjectIdCounter;
+                const subjectRow = document.createElement('div');
+                subjectRow.className = 'subject-row';
+                subjectRow.dataset.experimentCount = 0;
+                subjectRow.dataset.tutorialCount = 0;
+                subjectRow.dataset.assignmentCount = 0;
+                const subjectDetails = document.createElement('div');
+                subjectDetails.className = 'subject-details';
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'subject-name-input';
+                nameInput.placeholder = `Subject ${subjectId} Name`;
+                const contentControls = document.createElement('div');
+                contentControls.className = 'content-controls';
+                const contentTypeSelect = document.createElement('select');
+                contentTypeSelect.className = 'content-type-select';
+                contentTypeSelect.innerHTML = `<option value="experiment">Experiment</option><option value="tutorial">Tutorial</option><option value="assignment">Assignment</option>`;
+                const addContentBtn = document.createElement('button');
+                addContentBtn.textContent = 'Add';
+                addContentBtn.className = 'btn-tertiary';
+                
+                addContentBtn.addEventListener('click', () => {
+                    const type = contentTypeSelect.value;
+                    const containerId = `${type}-row-${subjectId}`;
+                    const targetContainer = subjectRow.querySelector(`#${containerId}`);
+                    if (targetContainer) {
+                        const countKey = `${type}Count`;
+                        subjectRow.dataset[countKey]++;
+                        const currentCount = subjectRow.dataset[countKey];
+                        const contentItem = document.createElement('div');
+                        
+                        // Set default status class
+                        contentItem.className = 'content-item status-not-submitted';
+                        
+                        contentItem.innerHTML = `
+                            <div class="content-item-header">${type.charAt(0).toUpperCase() + type.slice(1)} #${currentCount}</div>
+                            <input type="number" class="marks-input" placeholder="Enter Marks">
+                            <select class="status-select">
+                                <option value="not-submitted" selected>Not Submitted</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="corrected">Corrected</option>
+                            </select>
+                        `;
+                        targetContainer.appendChild(contentItem);
+                        
+                        // Add listener to the new status dropdown
+                        const statusSelect = contentItem.querySelector('.status-select');
+                        statusSelect.addEventListener('change', (e) => {
+                            const currentItem = e.target.closest('.content-item');
+                            // Reset classes
+                            currentItem.classList.remove('status-not-submitted', 'status-submitted', 'status-corrected');
+                            // Add the new class based on the dropdown's value
+                            currentItem.classList.add('status-' + e.target.value);
+                        });
+                    }
+                });
+                
+                contentControls.append(contentTypeSelect, addContentBtn);
+                subjectDetails.append(nameInput, contentControls);
+                const contentArea = document.createElement('div');
+                contentArea.className = 'content-area';
+                contentArea.innerHTML = `<div class="content-sub-row" id="experiment-row-${subjectId}"></div><div class="content-sub-row" id="tutorial-row-${subjectId}"></div><div class="content-sub-row" id="assignment-row-${subjectId}"></div>`;
+                subjectRow.append(subjectDetails, contentArea);
+                subjectsContainer.appendChild(subjectRow);
+            };
+
+            createSubjectsBtn.addEventListener('click', () => {
+                const count = parseInt(subjectCountInput.value, 10);
+                if (count > 0) {
+                    subjectsContainer.innerHTML = '';
+                    for (let i = 0; i < count; i++) {
+                        createSubjectRow();
+                    }
+                    setupContainer.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                }
+            });
+            addSubjectBtn.addEventListener('click', createSubjectRow);
+        });
+    </script>
+</body>
+</html>
