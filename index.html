@@ -18,6 +18,15 @@
             --border-color: #bdbbbb;
             --input-background: rgba(255,255,255,0.5);
             --heading-color: #3d70b2;
+            --danger-color: #fee2e2;
+            --danger-text-color: #b91c1c;
+            --danger-hover-bg: #ef4444;
+            --danger-hover-text: #fff;
+            --add-color: #dcfce7;
+            --add-text-color: #15803d;
+            --add-hover-bg: #22c55e;
+            --add-hover-text: #fff;
+
 
             /* Light Mode Status Colors */
             --status-not-submitted-bg: #fee2e2;
@@ -43,6 +52,15 @@
             --border-color: #334155;
             --input-background: rgba(51, 65, 85, 0.5);
             --heading-color: #93c5fd;
+            --danger-color: #a22727bc;
+            --danger-text-color: #fecaca;
+            --danger-hover-bg: #ef4444;
+            --danger-hover-text: #fff;
+            --add-color: #0ba541a9;
+            --add-text-color: #dcfce7;
+            --add-hover-bg: #3db268;
+            --add-hover-text: #fff;
+
 
             /* Dark Mode Status Colors */
             --status-not-submitted-bg: #a22727bc;
@@ -105,6 +123,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
             border-radius: 12px;
         }
+
         #setup-container { padding: 2rem; max-width: 500px; margin: 4rem auto; text-align: center; }
         #setup-container label { display: block; margin-bottom: 1rem; font-size: 1.2rem; }
         
@@ -125,9 +144,40 @@
         .btn-primary { background-color: var(--primary-color); }
         .btn-secondary { background-color: var(--secondary-color); }
         .btn-tertiary { background-color: var(--tertiary-color); color: var(--text-color); padding: 0.5rem 1rem; font-size: 0.9rem; }
-
+        
         /* Subject Row Styling */
-        .subject-row { width: 100%; padding: 1.5rem; display: grid; grid-template-columns: 250px 1fr; gap: 1.5rem; align-items: start; }
+        .subject-row {
+            width: 100%;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            position: relative;
+        }
+        
+        .subject-row.z-indexed { z-index: 10; }
+        .subject-row.content-collapsed .content-area { display: none; }
+        
+        .toggle-content-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 0.25rem;
+            z-index: 5;
+        }
+        .toggle-content-btn:hover {
+            color: var(--primary-color);
+            transform: none;
+            box-shadow: none;
+        }
+
         .subject-details { display: flex; flex-direction: column; gap: 1rem; }
         .subject-name-input { font-size: 1.1rem; font-weight: bold; }
         .content-controls { display: flex; gap: 0.5rem; align-items: center; }
@@ -135,17 +185,32 @@
         .content-area { display: flex; flex-direction: column; gap: 1rem; }
         .content-sub-row { display: flex; flex-wrap: wrap; gap: 1rem; min-height: 20px; }
         
-        .content-item { padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.75rem; width: 180px; }
-        .content-item-header { font-weight: 600; }
+        .content-item { padding: 0.5rem 1rem; border-radius: 8px; width: 190px; position: relative; }
+        .content-item-header { font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+        .content-item-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .content-item-marks-display { font-size: 0.9em; font-weight: bold; color: var(--primary-color); flex-shrink: 0; }
+        .menu-toggle-btn { background: transparent; color: var(--text-color); border: none; cursor: pointer; padding: 0; font-size: 1.5rem; line-height: 1; font-weight: bold; flex-shrink: 0; }
+        .menu-toggle-btn:hover { transform: none; box-shadow: none; color: var(--primary-color); }
+        .content-item-menu { position: absolute; top: calc(100% + 5px); right: 0; width: 180px; background: var(--card-background); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 20; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .menu-button-group { display: flex; gap: 0.5rem; }
+        .add-item-btn, .remove-item-btn {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            width: 100%;
+            flex: 1;
+        }
+        .add-item-btn { background-color: var(--add-color); color: var(--add-text-color); }
+        .add-item-btn:hover { background-color: var(--add-hover-bg); color: var(--add-hover-text); }
+        .remove-item-btn { background-color: var(--danger-color); color: var(--danger-text-color); }
+        .remove-item-btn:hover { background-color: var(--danger-hover-bg); color: var(--danger-hover-text); }
         
         /* Status Color Styling */
-        .content-item.status-not-submitted { background-color: var(--status-not-submitted-bg); border-color: var(--status-not-submitted-border); }
+        .content-item.status-not-submitted { background-color: var(--status-not-submitted-bg); border: 1px solid var(--status-not-submitted-border); }
         .content-item.status-not-submitted .content-item-header { color: var(--status-not-submitted-text); }
-        
-        .content-item.status-submitted { background-color: var(--status-submitted-bg); border-color: var(--status-submitted-border); }
+        .content-item.status-submitted { background-color: var(--status-submitted-bg); border: 1px solid var(--status-submitted-border); }
         .content-item.status-submitted .content-item-header { color: var(--status-submitted-text); }
-
-        .content-item.status-corrected { background-color: var(--status-corrected-bg); border-color: var(--status-corrected-border); }
+        .content-item.status-corrected { background-color: var(--status-corrected-bg); border: 1px solid var(--status-corrected-border); }
         .content-item.status-corrected .content-item-header { color: var(--status-corrected-text); }
         
         .marks-input { padding: 0.5rem; }
@@ -204,7 +269,7 @@
             applyTheme(savedTheme);
 
 
-            // --- ORIGINAL APP LOGIC ---
+            // --- APP LOGIC ---
             const setupContainer = document.getElementById('setup-container');
             const mainContent = document.getElementById('main-content');
             const createSubjectsBtn = document.getElementById('create-subjects-btn');
@@ -213,78 +278,167 @@
             const addSubjectBtn = document.getElementById('add-subject-btn');
             let subjectIdCounter = 0;
 
+            // NEW: Renumbers all items in a given container sequentially.
+            const renumberItems = (container) => {
+                if (!container) return;
+                const type = container.id.split('-')[0]; // eg., 'experiment' from 'experiment-row-1'
+                const typeDisplay = type.charAt(0).toUpperCase() + type.slice(1);
+                const items = container.querySelectorAll(':scope > .content-item');
+                items.forEach((item, index) => {
+                    const titleElement = item.querySelector('.content-item-title');
+                    if (titleElement) {
+                        titleElement.textContent = `${typeDisplay} #${index + 1}`;
+                    }
+                });
+            };
+
+            const createContentItem = (type, subjectRow, insertAfterElement = null) => {
+                const subjectId = subjectRow.dataset.subjectId;
+                const containerId = `${type}-row-${subjectId}`;
+                const targetContainer = subjectRow.querySelector(`#${containerId}`);
+
+                if (!targetContainer) return;
+                
+                const contentItem = document.createElement('div');
+                contentItem.className = 'content-item status-not-submitted';
+                
+                // The title is now just a placeholder, as renumberItems() will fix it.
+                contentItem.innerHTML = `
+                    <div class="content-item-header">
+                        <span class="content-item-title">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                        <span class="content-item-marks-display"></span>
+                        <button class="menu-toggle-btn">⋮</button>
+                    </div>
+                    <div class="content-item-menu hidden">
+                        <label>Marks:</label>
+                        <input type="number" class="marks-input" placeholder="Enter Marks">
+                        <label>Status:</label>
+                        <select class="status-select">
+                            <option value="not-submitted" selected>Not Submitted</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="corrected">Corrected</option>
+                        </select>
+                        <div class="menu-button-group">
+                            <button class="add-item-btn">Add Next</button>
+                            <button class="remove-item-btn">Remove</button>
+                        </div>
+                    </div>
+                `;
+
+                if (insertAfterElement) {
+                    insertAfterElement.insertAdjacentElement('afterend', contentItem);
+                } else {
+                    targetContainer.appendChild(contentItem);
+                }
+                
+                renumberItems(targetContainer); // Renumber after any insertion.
+
+                const menuToggleBtn = contentItem.querySelector('.menu-toggle-btn');
+                const menu = contentItem.querySelector('.content-item-menu');
+                const statusSelect = contentItem.querySelector('.status-select');
+                const removeItemBtn = contentItem.querySelector('.remove-item-btn');
+                const addItemBtn = contentItem.querySelector('.add-item-btn');
+                const marksInput = contentItem.querySelector('.marks-input');
+                const marksDisplay = contentItem.querySelector('.content-item-marks-display');
+
+                marksInput.addEventListener('input', (e) => {
+                    marksDisplay.textContent = e.target.value;
+                });
+
+                menuToggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const parentRow = e.target.closest('.subject-row');
+                    const isOpening = menu.classList.contains('hidden');
+                    document.querySelectorAll('.content-item-menu').forEach(m => m.classList.add('hidden'));
+                    document.querySelectorAll('.subject-row').forEach(r => r.classList.remove('z-indexed'));
+                    if (isOpening) {
+                        menu.classList.remove('hidden');
+                        parentRow.classList.add('z-indexed');
+                    }
+                });
+
+                removeItemBtn.addEventListener('click', () => {
+                    const parentContainer = contentItem.parentElement;
+                    contentItem.remove();
+                    renumberItems(parentContainer); // Renumber after any removal.
+                });
+                
+                addItemBtn.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                    createContentItem(type, subjectRow, contentItem);
+                });
+                
+                statusSelect.addEventListener('change', (e) => {
+                    contentItem.classList.remove('status-not-submitted', 'status-submitted', 'status-corrected');
+                    contentItem.classList.add('status-' + e.target.value);
+                });
+            };
+
             const createSubjectRow = () => {
                 subjectIdCounter++;
                 const subjectId = subjectIdCounter;
                 const subjectRow = document.createElement('div');
-                subjectRow.className = 'subject-row';
-                subjectRow.dataset.experimentCount = 0;
-                subjectRow.dataset.tutorialCount = 0;
-                subjectRow.dataset.assignmentCount = 0;
+                subjectRow.className = 'subject-row content-collapsed';
+                subjectRow.dataset.subjectId = subjectId;
+                
                 const subjectDetails = document.createElement('div');
                 subjectDetails.className = 'subject-details';
+                
                 const nameInput = document.createElement('input');
                 nameInput.type = 'text';
                 nameInput.className = 'subject-name-input';
                 nameInput.placeholder = `Subject ${subjectId} Name`;
+                
                 const contentControls = document.createElement('div');
                 contentControls.className = 'content-controls';
+                
                 const contentTypeSelect = document.createElement('select');
                 contentTypeSelect.className = 'content-type-select';
                 contentTypeSelect.innerHTML = `<option value="experiment">Experiment</option><option value="tutorial">Tutorial</option><option value="assignment">Assignment</option>`;
+                
                 const addContentBtn = document.createElement('button');
                 addContentBtn.textContent = 'Add';
                 addContentBtn.className = 'btn-tertiary';
                 
                 addContentBtn.addEventListener('click', () => {
-                    const type = contentTypeSelect.value;
-                    const containerId = `${type}-row-${subjectId}`;
-                    const targetContainer = subjectRow.querySelector(`#${containerId}`);
-                    if (targetContainer) {
-                        const countKey = `${type}Count`;
-                        subjectRow.dataset[countKey]++;
-                        const currentCount = subjectRow.dataset[countKey];
-                        const contentItem = document.createElement('div');
-                        
-                        // Set default status class
-                        contentItem.className = 'content-item status-not-submitted';
-                        
-                        contentItem.innerHTML = `
-                            <div class="content-item-header">${type.charAt(0).toUpperCase() + type.slice(1)} #${currentCount}</div>
-                            <input type="number" class="marks-input" placeholder="Enter Marks">
-                            <select class="status-select">
-                                <option value="not-submitted" selected>Not Submitted</option>
-                                <option value="submitted">Submitted</option>
-                                <option value="corrected">Corrected</option>
-                            </select>
-                        `;
-                        targetContainer.appendChild(contentItem);
-                        
-                        // Add listener to the new status dropdown
-                        const statusSelect = contentItem.querySelector('.status-select');
-                        statusSelect.addEventListener('change', (e) => {
-                            const currentItem = e.target.closest('.content-item');
-                            // Reset classes
-                            currentItem.classList.remove('status-not-submitted', 'status-submitted', 'status-corrected');
-                            // Add the new class based on the dropdown's value
-                            currentItem.classList.add('status-' + e.target.value);
-                        });
+                    if (subjectRow.classList.contains('content-collapsed')) {
+                        subjectRow.classList.remove('content-collapsed');
+                        toggleContentBtn.textContent = '▲';
                     }
+                    createContentItem(contentTypeSelect.value, subjectRow);
                 });
                 
                 contentControls.append(contentTypeSelect, addContentBtn);
                 subjectDetails.append(nameInput, contentControls);
+                
                 const contentArea = document.createElement('div');
                 contentArea.className = 'content-area';
                 contentArea.innerHTML = `<div class="content-sub-row" id="experiment-row-${subjectId}"></div><div class="content-sub-row" id="tutorial-row-${subjectId}"></div><div class="content-sub-row" id="assignment-row-${subjectId}"></div>`;
-                subjectRow.append(subjectDetails, contentArea);
+                
+                const toggleContentBtn = document.createElement('button');
+                toggleContentBtn.className = 'toggle-content-btn';
+                toggleContentBtn.textContent = '▼';
+                toggleContentBtn.addEventListener('click', () => {
+                    subjectRow.classList.toggle('content-collapsed');
+                    toggleContentBtn.textContent = subjectRow.classList.contains('content-collapsed') ? '▼' : '▲';
+                });
+
+                subjectRow.append(toggleContentBtn, subjectDetails, contentArea);
                 subjectsContainer.appendChild(subjectRow);
             };
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.content-item')) {
+                    document.querySelectorAll('.content-item-menu').forEach(menu => menu.classList.add('hidden'));
+                    document.querySelectorAll('.subject-row').forEach(row => row.classList.remove('z-indexed'));
+                }
+            });
 
             createSubjectsBtn.addEventListener('click', () => {
                 const count = parseInt(subjectCountInput.value, 10);
                 if (count > 0) {
                     subjectsContainer.innerHTML = '';
+                    subjectIdCounter = 0;
                     for (let i = 0; i < count; i++) {
                         createSubjectRow();
                     }
