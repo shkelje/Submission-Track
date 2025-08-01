@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUBMITION CHECK</title>
+    <title>SUBMISSION CHECK</title>
     <style>
         /* CSS Reset and Global Styles */
         :root {
@@ -133,9 +133,23 @@
         .content-controls { display: flex; gap: 0.5rem; align-items: center; }
         .content-type-select { flex-grow: 1; padding: 0.5rem; }
         .content-area { display: flex; flex-direction: column; gap: 1rem; }
-        .content-sub-row { display: flex; flex-wrap: wrap; gap: 1rem; min-height: 20px; }
         
-        .content-item { padding: 1rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.75rem; width: 180px; }
+        .content-sub-row {
+            display: flex;
+            flex-wrap: wrap; /* Default behavior for desktop */
+            gap: 1rem;
+            min-height: 20px;
+        }
+        
+        .content-item {
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 180px;
+            flex-shrink: 0; /* Prevents items from shrinking */
+        }
         .content-item-header { font-weight: 600; }
         
         /* Status Color Styling */
@@ -152,8 +166,23 @@
         #main-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
 
         /* Responsive Design */
-        @media (max-width: 900px) { .subject-row { grid-template-columns: 1fr; } }
-        @media (max-width: 600px) { h1 { font-size: 2rem; } .container { margin: 1rem auto; } #setup-container { padding: 1.5rem; } }
+        @media (max-width: 900px) {
+            .subject-row { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .container { margin: 1rem auto; }
+            #setup-container { padding: 1.5rem; }
+
+            /* --- MOBILE SCROLLING FIX --- */
+            .content-sub-row {
+                flex-wrap: nowrap;      /* Prevents wrapping to new lines */
+                overflow-x: auto;       /* Enables horizontal scrolling */
+                padding-bottom: 10px;   /* Adds space for the scrollbar */
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+        }
     </style>
 </head>
 <body>
@@ -166,7 +195,7 @@
     </div>
 
     <div class="container">
-        <h1>SUBMITION CHECK📝</h1>
+        <h1>SUBMISSION CHECK📝</h1>
 
         <div id="setup-container">
             <label for="subject-count-input">How many subjects do you want to start with?</label>
