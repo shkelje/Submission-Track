@@ -26,6 +26,10 @@
             --add-text-color: #15803d;
             --add-hover-bg: #22c55e;
             --add-hover-text: #fff;
+            --warning-color: #fef3c7;
+            --warning-text-color: #b45309;
+            --warning-hover-bg: #f59e0b;
+            --warning-hover-text: #fff;
 
 
             /* Light Mode Status Colors */
@@ -60,6 +64,10 @@
             --add-text-color: #dcfce7;
             --add-hover-bg: #3db268;
             --add-hover-text: #fff;
+            --warning-color: #b453098f;
+            --warning-text-color: #fef3c7;
+            --warning-hover-bg: #f59e0b;
+            --warning-hover-text: #fff;
 
 
             /* Dark Mode Status Colors */
@@ -185,6 +193,28 @@
         .content-area { display: flex; flex-direction: column; gap: 1rem; }
         .content-sub-row { display: flex; flex-wrap: wrap; gap: 1rem; min-height: 20px; }
         
+        /* NEW: Remove Subject Button */
+        .btn-remove-subject {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background-color: var(--danger-color);
+            color: var(--danger-text-color);
+        }
+        .btn-remove-subject:hover {
+             background-color: var(--danger-hover-bg);
+             color: var(--danger-hover-text);
+        }
+        .btn-remove-subject.confirming {
+             background-color: var(--warning-color);
+             color: var(--warning-text-color);
+        }
+        .btn-remove-subject.confirming:hover {
+             background-color: var(--warning-hover-bg);
+             color: var(--warning-hover-text);
+        }
+
+
         .content-item { padding: 0.5rem 1rem; border-radius: 8px; width: 190px; position: relative; }
         .content-item-header { font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
         .content-item-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -278,7 +308,7 @@
             const addSubjectBtn = document.getElementById('add-subject-btn');
             let subjectIdCounter = 0;
 
-            // --- NEW: SAVE/LOAD LOGIC ---
+            // --- SAVE/LOAD LOGIC ---
             const saveState = () => {
                 const subjectsData = [];
                 const subjectRows = document.querySelectorAll('.subject-row');
@@ -315,9 +345,12 @@
                 if (subjectsData.length === 0) return;
 
                 subjectsContainer.innerHTML = '';
+                let maxId = 0;
                 subjectsData.forEach(subjectData => {
-                    createSubjectRow(subjectData); // Pass data to create row
+                    createSubjectRow(subjectData);
+                    maxId = Math.max(maxId, parseInt(subjectData.id, 10));
                 });
+                subjectIdCounter = maxId;
 
                 setupContainer.classList.add('hidden');
                 mainContent.classList.remove('hidden');
@@ -343,7 +376,7 @@
                 if (!targetContainer) return;
                 
                 const contentItem = document.createElement('div');
-                contentItem.className = 'content-item'; // Base class
+                contentItem.className = 'content-item';
                 
                 contentItem.innerHTML = `
                     <div class="content-item-header">
@@ -383,14 +416,12 @@
                 const marksInput = contentItem.querySelector('.marks-input');
                 const marksDisplay = contentItem.querySelector('.content-item-marks-display');
 
-                // Populate data if loading from save
                 if (itemData) {
                     marksInput.value = itemData.marks;
                     marksDisplay.textContent = itemData.marks;
                     statusSelect.value = itemData.status;
                 }
                 contentItem.classList.add(`status-${statusSelect.value}`);
-
 
                 marksInput.addEventListener('input', (e) => {
                     marksDisplay.textContent = e.target.value;
@@ -429,11 +460,10 @@
                 });
             };
 
-            // MODIFIED: Accepts optional data object for loading state
             const createSubjectRow = (subjectData = null) => {
                 const subjectId = subjectData ? subjectData.id : ++subjectIdCounter;
-                if (!subjectData) subjectIdCounter = Math.max(subjectIdCounter, subjectId);
-
+                if(subjectData) subjectIdCounter = Math.max(subjectIdCounter, subjectId);
+                
                 const subjectRow = document.createElement('div');
                 subjectRow.className = 'subject-row';
                 if (!subjectData || subjectData.isCollapsed) {
@@ -472,8 +502,30 @@
                     saveState();
                 });
                 
+                // NEW: Remove Subject button
+                const removeSubjectBtn = document.createElement('button');
+                removeSubjectBtn.className = 'btn-remove-subject';
+                removeSubjectBtn.textContent = 'Remove Subject';
+                removeSubjectBtn.addEventListener('click', () => {
+                    if (removeSubjectBtn.dataset.state === 'confirm') {
+                        subjectRow.remove();
+                        saveState();
+                    } else {
+                        // Reset any other confirmation buttons first
+                        document.querySelectorAll('.btn-remove-subject.confirming').forEach(btn => {
+                            btn.classList.remove('confirming');
+                            btn.textContent = 'Remove Subject';
+                            delete btn.dataset.state;
+                        });
+                        // Set this button to confirmation state
+                        removeSubjectBtn.dataset.state = 'confirm';
+                        removeSubjectBtn.textContent = 'Confirm Remove?';
+                        removeSubjectBtn.classList.add('confirming');
+                    }
+                });
+
                 contentControls.append(contentTypeSelect, addContentBtn);
-                subjectDetails.append(nameInput, contentControls);
+                subjectDetails.append(nameInput, contentControls, removeSubjectBtn);
                 
                 const contentArea = document.createElement('div');
                 contentArea.className = 'content-area';
@@ -491,7 +543,6 @@
                 subjectRow.append(toggleContentBtn, subjectDetails, contentArea);
                 subjectsContainer.appendChild(subjectRow);
 
-                // If loading, create the content items too
                 if (subjectData) {
                     ['experiment', 'tutorial', 'assignment'].forEach(type => {
                         subjectData.content[type].forEach(itemData => {
@@ -506,6 +557,14 @@
                     document.querySelectorAll('.content-item-menu').forEach(menu => menu.classList.add('hidden'));
                     document.querySelectorAll('.subject-row').forEach(row => row.classList.remove('z-indexed'));
                 }
+                // NEW: Reset remove subject buttons if click is not on a confirming button
+                document.querySelectorAll('.btn-remove-subject.confirming').forEach(btn => {
+                    if (btn !== e.target) {
+                        btn.classList.remove('confirming');
+                        btn.textContent = 'Remove Subject';
+                        delete btn.dataset.state;
+                    }
+                });
             });
 
             createSubjectsBtn.addEventListener('click', () => {
